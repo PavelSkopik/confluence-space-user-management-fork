@@ -1,6 +1,12 @@
 Confluence Space User Management Plugin
 =====
 
+### Important Notice
+
+*The Confluence Space User Management Plugin add-on may soon be transitioning to a paid, commercial offering for support and development. As part of the planned transition, this add-on may no longer be hosted by GitHub under the Sillycat group owner. Please stay tuned for more details about this transition to come in the near future.*
+
+### Summary
+
 The CSUM plugin gives Space Administrators ability to manage users and user-groups associated to their Atlassian Confluence Wiki Spaces.
 
 Using this plugin Space Administrators can:
