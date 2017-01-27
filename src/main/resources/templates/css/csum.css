@@ -56,14 +56,14 @@
     div#csum form#bulkEdit fieldset label {display: block; margin: 1em 0 0 0;}
     div#csum form#bulkEdit fieldset input {width:auto;}
 
-    div#csum div#footer {clear:both; border-top:1px solid #CCC; margin:10px 0 0 0; padding:7px 0 0 0;}
-    div#csum div#footer ul {clear:both; display:block; margin:0; padding:0 0 0 2px;}
-    div#csum div#footer ul li {display:inline; color:#036;}
-    div#csum div#footer ul li a {color:#036; line-height:1;}
-    div#csum div#footer ul li a img {padding:2px;}
-	div#csum div#footer form {padding:3px;}
-	div#csum div#footer form fieldset {}
-	div#csum div#footer form label {display:inline;}
+    div#csum div.csum-footer {clear:both; border-top:1px solid #CCC; margin:10px 0 0 0; padding:7px 0 0 0;}
+    div#csum div.csum-footer ul {clear:both; display:block; margin:0; padding:0 0 0 2px;}
+    div#csum div.csum-footer ul li {display:inline; color:#036;}
+    div#csum div.csum-footer ul li a {color:#036; line-height:1;}
+    div#csum div.csum-footer ul li a img {padding:2px;}
+	div#csum div.csum-footer form {padding:3px;}
+	div#csum div.csum-footer form fieldset {}
+	div#csum div.csum-footer form label {display:inline;}
 
     div#csum a#showAdvS {margin:6px 0 0 0; display: block; float:right; clear: both; text-decoration:none;}
     div#csum a#hideAdvS {display:block; margin:3px 3px 1px 0; float:right; text-decoration: none;}

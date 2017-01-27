@@ -38,235 +38,252 @@
     #applyDecorator("root")
         #decoratorParam("helper" $action.helper)
         #decoratorParam("context" "space-custom-usermanagement") ##note this should be same as item.key defined in atlassian-plugin.xml
-        #decoratorParam("mode" "view-edit-spaceUser")
-        
-            <content tag="spacekey">${action.space.key}</content>
+
+    <content tag="spacekey">${action.space.key}</content>
 
     #set( $refreshbugworkaround = "&redirect=" )
 
-        $webResourceManager.requireResourcesForContext("raju.kadam.confluence.permissionmgmt.csumcontext")
+    $webResourceManager.requireResourcesForContext("raju.kadam.confluence.permissionmgmt.csumcontext")
 
     <body>
+        #applyDecorator ("root")
+            #decoratorParam("context" "spacetoolspanel")
+            #decoratorParam("selectedSpaceToolsWebItem" "custom-usermanagement")
+            #decoratorParam("helper" $action.helper)
 
-		<script>
-		YAHOO.namespace("ifs");
+        <script>
+            YAHOO.namespace("ifs");
 
-		var trashLinkInterception = function(e) {
-			YAHOO.util.Event.preventDefault(e);
-                        var targetLink = document.getElementById("trashGroup").href
+            var trashLinkInterception = function (e) {
+                YAHOO.util.Event.preventDefault(e);
+                var targetLink = document.getElementById("trashGroup").href
 
-			if (confirm("Are you sure you want to delete this group?")) {
-                            window.location = targetLink
+                if (confirm("Are you sure you want to delete this group?")) {
+                    window.location = targetLink
+                }
+            };
+
+            function validateForm(e, form) {
+                var valid = true;
+                var fields = form.getElementsByTagName("input");
+
+
+                // Check text input
+                for (var i = 0; i < fields.length; i++) {
+                    if (fields[i].getAttribute("required") === "true" && fields[i].getAttribute("type") === "text" && fields[i].value == "" && fields[i].id !== "") {
+                        var field = new YAHOO.util.Element(fields[i].id);
+                        field.addClass("attention");
+                        valid = false;
+                    } else if (fields[i].hasAttribute("required") && fields[i].id !== "") {
+                        var field = new YAHOO.util.Element(fields[i].id);
+                        field.removeClass("attention");
+                    }
+                }
+
+                var isBulkForm;
+                for (var i = 0; i < fields.length; i++) {
+                    if (fields[i].getAttribute("type") === "radio") {
+                        isBulkForm = true;
+                    }
+                }
+
+                if (isBulkForm === true) {
+                    // Handle bulk form radio buttons
+                    var bcl = new YAHOO.util.Element('bulkChooseWrap');
+                    if (!document.forms['bulkEdit'].elements[3].checked && !document.forms['bulkEdit'].elements[4].checked) {
+                        valid = false;
+                        bcl.addClass("attention");
+                    } else {
+                        bcl.removeClass("attention");
+                    }
+
+                    // Handle bulk check boxes
+                    var listSelected;
+                    for (var i = 0; i < fields.length; i++) {
+                        if (fields[i].getAttribute("type") === "checkbox" && fields[i].checked === true) {
+                            listSelected = true;
                         }
-		};
+                    }
 
-		function validateForm(e, form)
-		{
-			var valid = true;
-			var fields = form.getElementsByTagName("input");
+                    var cbl = new YAHOO.util.Element('bulkCheckboxWrap');
+                    if (listSelected !== true) {
+                        valid = false;
+                        cbl.addClass("attention");
+                    } else {
+                        cbl.removeClass("attention");
+                    }
 
-
-			// Check text input				
-			for ( var i = 0; i < fields.length; i++ ){
-				if (fields[i].getAttribute("required") === "true" && fields[i].getAttribute("type") === "text" && fields[i].value == "" && fields[i].id !== "") {
-					var field = new YAHOO.util.Element(fields[i].id);
-					field.addClass("attention");
-					valid = false;		
-				} else if (fields[i].hasAttribute("required") && fields[i].id !== "") {
-					var field = new YAHOO.util.Element(fields[i].id);
-					field.removeClass("attention");
-				}
-			}
-
-			var isBulkForm;
-			for ( var i = 0; i < fields.length; i++ ){
-				if (fields[i].getAttribute("type") === "radio") {
-					isBulkForm = true;
-				}
-			}
-
-			if (isBulkForm === true){
-				// Handle bulk form radio buttons
-				var bcl = new YAHOO.util.Element('bulkChooseWrap');
-				if(!document.forms['bulkEdit'].elements[3].checked && !document.forms['bulkEdit'].elements[4].checked){
-					valid = false;					
-					bcl.addClass("attention");
-				} else {
-					bcl.removeClass("attention");
-				}
-
-				// Handle bulk check boxes
-				var listSelected;
-				for ( var i = 0; i < fields.length; i++ ){
-					if (fields[i].getAttribute("type") === "checkbox" && fields[i].checked === true) {
-						listSelected = true;
-					}
-				}
-
-				var cbl = new YAHOO.util.Element('bulkCheckboxWrap');
-				if(listSelected !== true){
-					valid = false;					
-					cbl.addClass("attention");
-				} else {
-					cbl.removeClass("attention");
-				}
-
-			} //End extra bulk checks
+                } //End extra bulk checks
 
 
-			// If all tests have passed continue form submission
-			if (valid !== true) {
-				alert("Please correct the fields with an red background.");
-				YAHOO.util.Event.preventDefault(e);
-			}
-		}
-		
-		YAHOO.util.Event.addListener("trashGroup", "click", trashLinkInterception);
-		YAHOO.util.Event.addListener(window, "load", YAHOO.ifs.init);
-		</script>
+                // If all tests have passed continue form submission
+                if (valid !== true) {
+                    alert("Please correct the fields with an red background.");
+                    YAHOO.util.Event.preventDefault(e);
+                }
+            }
 
-<div id="csum">
+            YAHOO.util.Event.addListener("trashGroup", "click", trashLinkInterception);
+            YAHOO.util.Event.addListener(window, "load", YAHOO.ifs.init);
+        </script>
 
-  #if($action.isNotAllowed())
-    <div class="alertPanel">
+        <div id="csum">
 
-    <img src="/images/icons/emoticons/forbidden.gif" align="absmiddle" width="16" height="16">
+            #if($action.isNotAllowed())
+                <div class="alertPanel">
 
-    $action.getText("csum.display.alert.notallowed")
+                    <img src="/images/icons/emoticons/forbidden.gif" align="absmiddle" width="16" height="16">
 
-    </div>
-  #elseif($action.isPluginDown())
-    ## this is either the message set in config, or is an i18n message if config message is empty
-    <div class="alertPanel">
+                    $action.getText("csum.display.alert.notallowed")
 
-    <img src="/images/icons/emoticons/forbidden.gif" align="absmiddle" width="16" height="16">
+                </div>
+            #elseif($action.isPluginDown())
+            ## this is either the message set in config, or is an i18n message if config message is empty
+                <div class="alertPanel">
 
-    $action.pluginDownMessage
+                    <img src="/images/icons/emoticons/forbidden.gif" align="absmiddle" width="16" height="16">
 
-    </div>
-  #elseif(!$action.space)
-    ## this happens whenever action.getSpace() returns null (as for a bad space key).
-    <div class="alertPanel">
+                    $action.pluginDownMessage
 
-    <img src="/images/icons/emoticons/forbidden.gif" align="absmiddle" width="16" height="16">
+                </div>
+            #elseif(!$action.space)
+            ## this happens whenever action.getSpace() returns null (as for a bad space key).
+                <div class="alertPanel">
 
-    $action.getText("csum.display.alert.invalidspacekey")
+                    <img src="/images/icons/emoticons/forbidden.gif" align="absmiddle" width="16" height="16">
 
-    </div>
-  #elseif(!$action.remoteUser)
-    ## this is not likely to happen since confluence security keeps you from viewing this page as anyone without
-    ## rights to the space. It is included just in case for some reason a user gets through that security with a null user.
-    <div class="alertPanel">
+                    $action.getText("csum.display.alert.invalidspacekey")
 
-    <img src="/images/icons/emoticons/forbidden.gif" align="absmiddle" width="16" height="16">
+                </div>
+            #elseif(!$action.authenticatedUser)
+            ## this is not likely to happen since confluence security keeps you from viewing this page as anyone without
+            ## rights to the space. It is included just in case for some reason a user gets through that security with a null user.
+                <div class="alertPanel">
 
-    $action.getText("csum.display.alert.invaliduser")
+                    <img src="/images/icons/emoticons/forbidden.gif" align="absmiddle" width="16" height="16">
 
-    </div>
-  #else
-    <div class="messages">
-		## Action errors are already displayed at top of page under tab because this is part of space management
-		## which already includes it
-		##parse ( "/template/includes/actionerrors.vm" )
-       <!-- Display result of operation if successful -->
-        ## NOTE: This template is required for Confluence 2.3.x compatibility. (In later versions, Confluence implemented it.)
-		#parse ( "/templates/permissionmgmt/actionmessages.vm" )
-	</div>
+                    $action.getText("csum.display.alert.invaliduser")
 
-    #set($configValidationResponse=$action.configValidationResponse)
-	#if($configValidationResponse.isValid())
+                </div>
+            #else
+                <div class="messages">
+                ## Action errors are already displayed at top of page under tab because this is part of space management
+                ## which already includes it
+                ##parse ( "/template/includes/actionerrors.vm" )
+                    <!-- Display result of operation if successful -->
+                ## NOTE: This template is required for Confluence 2.3.x compatibility. (In later versions, Confluence implemented it.)
+                    #parse ( "/templates/permissionmgmt/actionmessages.vm" )
+                </div>
 
-    <div id="groups">
-        #parse( "/templates/permissionmgmt/group-list.vm" )
-    </div>
-        
-        <div id="groupEditor">
-        #if($action.userSearch)
+                #set($configValidationResponse=$action.configValidationResponse)
+                #if($configValidationResponse.isValid())
+
+                    <div id="groups">
+                        #parse( "/templates/permissionmgmt/group-list.vm" )
+                    </div>
+
+                    <div id="groupEditor">
+                        #if($action.userSearch)
             #parse ( "/templates/permissionmgmt/manage-users-advanced.vm" )
         #elseif($action.bulkEdit)
-            #parse ( "/templates/permissionmgmt/bulk-edit.vm" )
-        #else
-            #if(${action.selectedGroup})
-                #parse ( "/templates/permissionmgmt/manage-users-basic.vm" )
-            #end
-        #end
-        </div>
-<div style="clear:both"></div>
-        <div id="footer">
-				<ul>
-				#if($groups && $groups.total>0)
-			        <li><a href="docustompermissionsmanage.action?key=$generalUtil.urlEncode($key)&bulkEdit=1">$action.getText("csum.display.bulkedit")</a> </li>
-			        #*
-					#if($action.isUserSearchEnabled)
-					<li>| <a href="docustompermissionsmanage.action?key=$generalUtil.urlEncode($key)&userSearch=1">$action.getText("csum.searchUsers.link.title")</a> </li>
-					#end
-					*#
-			    #end
+                            #parse ( "/templates/permissionmgmt/bulk-edit.vm" )
+                        #else
+                            #if(${action.selectedGroup})
+                                #parse ( "/templates/permissionmgmt/manage-users-basic.vm" )
+                            #end
+                        #end
+                    </div>
+                    <div style="clear:both"></div>
+                    <div class="csum-footer">
+                        <ul>
+                            #if($groups && $groups.total>0)
+                                <li>
+                                    <a href="docustompermissionsmanage.action?key=$generalUtil.urlEncode($key)&bulkEdit=1">$action.getText(
+                                        "csum.display.bulkedit")</a></li>
+                            #*
+                            #if($action.isUserSearchEnabled)
+                            <li>| <a href="docustompermissionsmanage.action?key=$generalUtil.urlEncode($key)&userSearch=1">$action.getText("csum.searchUsers.link.title")</a> </li>
+                            #end
+                            *#
+                            #end
 
-			    #if($isGroupActionsPermitted)
-					<li>
-					#if($groups && $groups.total>0)
-					 |
-					#end
-					<a href="${req.contextPath}/spaces/spacepermissions.action?key=$generalUtil.urlEncode($key)">
-						#*<img src="${req.contextPath}/images/icons/lock_16.gif"/>*#
-						$action.getText("csum.display.spacepermissions")</a> </li>
-					#*<li>| <a href="${req.contextPath}/pages/listpermissionpages.action?key=$generalUtil.urlEncode($key)">
-						<img src="${req.contextPath}/images/icons/locked_pages_16.gif"/>
-						$action.getText("csum.page.permissions.link.title")</a> </li>*#
-			    #end
+                            #if($isGroupActionsPermitted)
+                                <li>
+                                    #if($groups && $groups.total>0)
+                                        |
+                                    #end
+                                    <a href="${req.contextPath}/spaces/spacepermissions.action?key=$generalUtil.urlEncode($key)">
+                                    #*<img src="${req.contextPath}/images/icons/lock_16.gif"/>*#
+						$action.getText("csum.display.spacepermissions")</a></li>
+                            #*<li>| <a href="${req.contextPath}/pages/listpermissionpages.action?key=$generalUtil.urlEncode($key)">
+                                <img src="${req.contextPath}/images/icons/locked_pages_16.gif"/>
+                                $action.getText("csum.page.permissions.link.title")</a> </li>*#
+                            #end
 
-                #if($action.selectedGroup)
-                <li>| <a href="docustompermissionsmanage.action?key=$generalUtil.urlEncode($key)&selectedGroup=$generalUtil.urlEncode($selectedGroup)&refresh=1">$action.getText("csum.display.refresh")</a> </li>
+                            #if($action.selectedGroup)
+                                <li>| <a
+                                        href="docustompermissionsmanage.action?key=$generalUtil.urlEncode($key)&selectedGroup=$generalUtil.urlEncode($selectedGroup)&refresh=1">$action.getText(
+                                    "csum.display.refresh")</a></li>
+                            #else
+                                <li>| <a
+                                        href="docustompermissionsmanage.action?key=$generalUtil.urlEncode($key)&refresh=1">$action.getText(
+                                    "csum.display.refresh")</a></li>
+                            #end
+
+                        </ul>
+
+                        #set($availableSpaces = $action.spacesAsSpaceAdminForUser)
+                        #if($availableSpaces && $availableSpaces.size()>1)
+                            <form method="GET" action="docustompermissionsmanage.action" id="changeSpace"
+                                  name="changeSpace">
+                                <fieldset>
+                                    <label>$action.getText("csum.display.changespace.label"): </label>
+                                    <select name="key">
+                                        #foreach ($availableSpace in $availableSpaces)
+                                            <option value="$availableSpace.key"
+                                                    #if($availableSpace.key==$action.space.key)selected="true"#end>$generalUtil.htmlEncode($availableSpace.name)
+                                                ($generalUtil.htmlEncode($availableSpace.key))
+                                            </option>
+                                        #end
+                                    </select>
+                                    <input type="submit" value='$action.getText("csum.display.changespace")'
+                                           class="submitBttn"/>
+                                </fieldset>
+                            </form>
+                        #end
+                    </div>
                 #else
-                <li>| <a href="docustompermissionsmanage.action?key=$generalUtil.urlEncode($key)&refresh=1">$action.getText("csum.display.refresh")</a> </li>
+                    <p class="noteMacro">
+
+                    <p>$action.getText("csum.display.error.adminmustconfigure") <a
+                            href="$req.contextPath/admin/plugins/custompermissionsconfig/config.action">$action.getText(
+                        "csum.display.error.adminmustconfigure.linktoconfigurator")</a>.</p>
+
+                    <p>$action.getText("csum.display.error.adminmustconfigure.errormessages.title"):</p>
+                    #set($fieldNameToErrorMessage=$configValidationResponse.fieldNameToErrorMessage)
+                    <ul>
+                        #foreach($configFieldName in $fieldNameToErrorMessage.keySet())
+                            <li>$configFieldName: $fieldNameToErrorMessage.get($configFieldName)</li>
+                        #end
+                    </ul>
+                    </p>
                 #end
-			        
-				</ul>
 
-                #set($availableSpaces = $action.spacesAsSpaceAdminForUser)
-	            #if($availableSpaces && $availableSpaces.size()>1)
-                <form method="GET" action="docustompermissionsmanage.action" id="changeSpace" name="changeSpace">
-	                <fieldset>
-	                    <label>$action.getText("csum.display.changespace.label"): </label>
-	                    <select name="key">
-	                        #foreach ($availableSpace in $availableSpaces)
-	                        <option value="$availableSpace.key" #if($availableSpace.key==$action.space.key)selected="true"#end>$generalUtil.htmlEncode($availableSpace.name) ($generalUtil.htmlEncode($availableSpace.key))</option>
-	                        #end
-	                    </select>
-	                	<input type="submit" value='$action.getText("csum.display.changespace")' class="submitBttn"/>
-	                </fieldset>
-	            </form>
-	            #end				
-		</div>
-    #else
-        <p class="noteMacro">
-        <p>$action.getText("csum.display.error.adminmustconfigure") <a href="$req.contextPath/admin/plugins/custompermissionsconfig/config.action">$action.getText("csum.display.error.adminmustconfigure.linktoconfigurator")</a>.</p>
-        <p>$action.getText("csum.display.error.adminmustconfigure.errormessages.title"):</p>
-            #set($fieldNameToErrorMessage=$configValidationResponse.fieldNameToErrorMessage)
-            <ul>
-            #foreach($configFieldName in $fieldNameToErrorMessage.keySet())
-                <li>$configFieldName: $fieldNameToErrorMessage.get($configFieldName)</li>
+                #parse ( "/admin/admin-breadcrumbs.vm" )
+
+            ## show action info, cache for debugging using request param &debug once (have to kill session after that to stop debugging)
+                #set($actionDebug=$action.actionDebug)
+                #if($actionDebug)
+                    $actionDebug
+                #end
+
             #end
-            </ul>
-        </p>
+
+            <div style="clear:both"></div>
+
+        </div>
+        <!-- end display -->
     #end
-
-    #parse ( "/admin/admin-breadcrumbs.vm" )
-
-    ## show action info, cache for debugging using request param &debug once (have to kill session after that to stop debugging)
-    #set($actionDebug=$action.actionDebug)
-    #if($actionDebug)
-        $actionDebug
-    #end
-
-  #end
-
-<div style="clear:both"></div>
-
+    </body>
 #end
-</div>
-<!-- end display -->
-
-</body>
 </html>
